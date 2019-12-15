@@ -9,6 +9,9 @@
 \usepackage{amsfonts}       % blackboard math symbols
 \usepackage{nicefrac}       % compact symbols for 1/2, etc.
 \usepackage{microtype}      % microtypography
+\usepackage{graphicx}
+\graphicspath{ {./images/} }
+
 
 \title{Music Classification Using Convolutional Neural Networks}
 
@@ -64,291 +67,130 @@ edge devices such as smart phones or other, more constrained environments, even 
 cost of precision. This decision implied a rather small model size and great model 
 simplicity, this is why we chose to try a simple convolutional neural network.    
 
-\subsection{Style}
+\section{The Model}
 
-Papers to be submitted to NeurIPS 2019 must be prepared according to the
-instructions presented here. Papers may only be up to eight pages long,
-including figures. Additional pages \emph{containing only acknowledgments and/or
-  cited references} are allowed. Papers that exceed eight pages of content
-(ignoring references) will not be reviewed, or in any other way considered for
-presentation at the conference.
+\subsection{Trial and Error}
 
-The margins in 2019 are the same as since 2007, which allow for $\sim$$15\%$
-more words in the paper compared to earlier years.
+We went through numerous iterations and tried various convolutional neural 
+network architectures during development. At first we tried to use convolutional 
+windows that would overlap the whole frequency domain and move only in the time domain, 
+since although spectrograms can be regarded as arbitrary two dimensional data, the two 
+axises have different meanings. This path led nowhere, the model was not able to 
+overfit on a small subset of the dataset. We decided to use simple, rectangular convolutional 
+windows, which could be called standard by now. This approach was indeed able to overfit, meaning 
+it was worth to try learning on the whole dataset. Validation error would cease to decrease 
+after the first few epochs. This would be followed by decreasing the input size of the model 
+by splitting the samples of 30 seconds length into 4 smaller fragments. 
 
-Authors are required to use the NeurIPS \LaTeX{} style files obtainable at the
-NeurIPS website as indicated below. Please make sure you use the current files
-and not previous versions. Tweaking the style files may be grounds for
-rejection.
+\subsection{The Final Model Architecture}
 
-\subsection{Retrieval of style files}
+The final model consists of the following layers: 
 
-The style files for NeurIPS and other conference information are available on
-the World Wide Web at
+\begin{itemize}
+\item a convolutional layer with a depth of 32 and a window shape of (2, 6)
+\item another convolutional layer with a depth of 32 and a window shape of (2, 6)
+\item a convolutional layer with a depth of 64 and a window shape identical to the previous ones
+\item a fully connected layer of 512 neurons
+\end{itemize}
+
+Each convolutional layer was followed by a batch normalization 
+layer and a max-pooling layer. L1 and L2 regularizers were adopted to the fully connected layer. 
+The model has an output layer of 10 neurons with \emph{softmax} as activation function. 
+
+\subsection{Hyperparameters}
+\paragraph{Activation functions}
+At first we tried using \emph{ReLU} activations between each layer. This lead to many issues, 
+since in the context of Mel spectrograms negative numbers have significance. Perceiving this, 
+we decided to use \emph{Hyperbolic Tangent} as activation function.
+
+\paragraph{Loss Function}
+The loss function used is \emph{Sparse Categorical Crossentropy} since the labels are not one-hot encoded. 
+
+\paragraph{Optimizer}
+The optimizer algorithm used during training was Stochastic Gradient Descent with a learning rate of 0.01. 
+At first we've tried with \emph{Adam} but it did not perform quite as expected. The next choice 
+was \emph{Adadelta} which showed promising results, but it did not appear to stable due to the 
+fluctuation we have observed on both the graphs of training and validation accuracy. 
+
+\paragraph{Number of Epoch and Data Split}
+The model was trained for 100 epochs with a batch size of 5. 80 percent of the data was used 
+for training, 10 percent was used for validation and the last 10 percent was used for testing. 
+
+\paragraph{Vanishing Gradient} 
+
+During the training process we've noticed that after a certain number of epochs 
+the validation accuracy would cease to converge. This was due to the Vanishing 
+Gradient problem, which led to the choice of using \emph{Linear} activation between the 
+convolutional layers, leaving \emph{Hyperbolic Tangent} only between the output and 
+the fully connected layer. 
+
+\section{Results}
+
+\subsection{Training and Validation}
+
+The model is still overfitting with the validation accuracy being stuck at \~60\% and the training accuracy soaring. 
+
 \begin{center}
-  \url{http://www.neurips.cc/}
+    \includegraphics[scale=0.5]{acc}
+		\includegraphics[scale=0.5]{loss}
 \end{center}
-The file \verb+neurips_2019.pdf+ contains these instructions and illustrates the
-various formatting requirements your NeurIPS paper must satisfy.
 
-The only supported style file for NeurIPS 2019 is \verb+neurips_2019.sty+,
-rewritten for \LaTeXe{}.  \textbf{Previous style files for \LaTeX{} 2.09,
-  Microsoft Word, and RTF are no longer supported!}
+\subsection{Testing Accuracy}
 
-The \LaTeX{} style file contains three optional arguments: \verb+final+, which
-creates a camera-ready copy, \verb+preprint+, which creates a preprint for
-submission to, e.g., arXiv, and \verb+nonatbib+, which will not load the
-\verb+natbib+ package for you in case of package clash.
+The final testing accuracy of the model is \textbf{0.61\%}. Below are the Classication Matrix and the final 
+Classification Report.
 
-\paragraph{Preprint option}
-If you wish to post a preprint of your work online, e.g., on arXiv, using the
-NeurIPS style, please use the \verb+preprint+ option. This will create a
-nonanonymized version of your work with the text ``Preprint. Work in progress.''
-in the footer. This version may be distributed as you see fit. Please \textbf{do
-  not} use the \verb+final+ option, which should \textbf{only} be used for
-papers accepted to NeurIPS.
-
-At submission time, please omit the \verb+final+ and \verb+preprint+
-options. This will anonymize your submission and add line numbers to aid
-review. Please do \emph{not} refer to these line numbers in your paper as they
-will be removed during generation of camera-ready copies.
-
-The file \verb+neurips_2019.tex+ may be used as a ``shell'' for writing your
-paper. All you have to do is replace the author, title, abstract, and text of
-the paper with your own.
-
-The formatting instructions contained in these style files are summarized in
-Sections \ref{gen_inst}, \ref{headings}, and \ref{others} below.
-
-\section{General formatting instructions}
-\label{gen_inst}
-
-The text must be confined within a rectangle 5.5~inches (33~picas) wide and
-9~inches (54~picas) long. The left margin is 1.5~inch (9~picas).  Use 10~point
-type with a vertical spacing (leading) of 11~points.  Times New Roman is the
-preferred typeface throughout, and will be selected for you by default.
-Paragraphs are separated by \nicefrac{1}{2}~line space (5.5 points), with no
-indentation.
-
-The paper title should be 17~point, initial caps/lower case, bold, centered
-between two horizontal rules. The top rule should be 4~points thick and the
-bottom rule should be 1~point thick. Allow \nicefrac{1}{4}~inch space above and
-below the title to rules. All pages should start at 1~inch (6~picas) from the
-top of the page.
-
-For the final version, authors' names are set in boldface, and each name is
-centered above the corresponding address. The lead author's name is to be listed
-first (left-most), and the co-authors' names (if different address) are set to
-follow. If there is only one co-author, list both author and co-author side by
-side.
-
-Please pay special attention to the instructions in Section \ref{others}
-regarding figures, tables, acknowledgments, and references.
-
-\section{Headings: first level}
-\label{headings}
-
-All headings should be lower case (except for first word and proper nouns),
-flush left, and bold.
-
-First-level headings should be in 12-point type.
-
-\subsection{Headings: second level}
-
-Second-level headings should be in 10-point type.
-
-\subsubsection{Headings: third level}
-
-Third-level headings should be in 10-point type.
-
-\paragraph{Paragraphs}
-
-There is also a \verb+\paragraph+ command available, which sets the heading in
-bold, flush left, and inline with the text, with the heading followed by 1\,em
-of space.
-
-\section{Citations, figures, tables, references}
-\label{others}
-
-These instructions apply to everyone.
-
-\subsection{Citations within the text}
-
-The \verb+natbib+ package will be loaded for you by default.  Citations may be
-author/year or numeric, as long as you maintain internal consistency.  As to the
-format of the references themselves, any style is acceptable as long as it is
-used consistently.
-
-The documentation for \verb+natbib+ may be found at
-\begin{center}
-  \url{http://mirrors.ctan.org/macros/latex/contrib/natbib/natnotes.pdf}
-\end{center}
-Of note is the command \verb+\citet+, which produces citations appropriate for
-use in inline text.  For example,
-\begin{verbatim}
-   \citet{hasselmo} investigated\dots
-\end{verbatim}
-produces
-\begin{quote}
-  Hasselmo, et al.\ (1995) investigated\dots
-\end{quote}
-
-If you wish to load the \verb+natbib+ package with options, you may add the
-following before loading the \verb+neurips_2019+ package:
-\begin{verbatim}
-   \PassOptionsToPackage{options}{natbib}
-\end{verbatim}
-
-If \verb+natbib+ clashes with another package you load, you can add the optional
-argument \verb+nonatbib+ when loading the style file:
-\begin{verbatim}
-   \usepackage[nonatbib]{neurips_2019}
-\end{verbatim}
-
-As submission is double blind, refer to your own published work in the third
-person. That is, use ``In the previous work of Jones et al.\ [4],'' not ``In our
-previous work [4].'' If you cite your other papers that are not widely available
-(e.g., a journal paper under review), use anonymous author names in the
-citation, e.g., an author of the form ``A.\ Anonymous.''
-
-\subsection{Footnotes}
-
-Footnotes should be used sparingly.  If you do require a footnote, indicate
-footnotes with a number\footnote{Sample of the first footnote.} in the
-text. Place the footnotes at the bottom of the page on which they appear.
-Precede the footnote with a horizontal rule of 2~inches (12~picas).
-
-Note that footnotes are properly typeset \emph{after} punctuation
-marks.\footnote{As in this example.}
-
-\subsection{Figures}
-
-\begin{figure}
+\begin{table}[h]
+  \caption{Confusion Matrix}
   \centering
-  \fbox{\rule[-.5cm]{0cm}{4cm} \rule[-.5cm]{4cm}{0cm}}
-  \caption{Sample figure caption.}
-\end{figure}
-
-All artwork must be neat, clean, and legible. Lines should be dark enough for
-purposes of reproduction. The figure number and caption always appear after the
-figure. Place one line space before the figure caption and one line space after
-the figure. The figure caption should be lower case (except for first word and
-proper nouns); figures are numbered consecutively.
-
-You may use color figures.  However, it is best for the figure captions and the
-paper body to be legible if the paper is printed in either black/white or in
-color.
-
-\subsection{Tables}
-
-All tables must be centered, neat, clean and legible.  The table number and
-title always appear before the table.  See Table~\ref{sample-table}.
-
-Place one line space before the table title, one line space after the
-table title, and one line space after the table. The table title must
-be lower case (except for first word and proper nouns); tables are
-numbered consecutively.
-
-Note that publication-quality tables \emph{do not contain vertical rules.} We
-strongly suggest the use of the \verb+booktabs+ package, which allows for
-typesetting high-quality, professional tables:
-\begin{center}
-  \url{https://www.ctan.org/pkg/booktabs}
-\end{center}
-This package was used to typeset Table~\ref{sample-table}.
-
-\begin{table}
-  \caption{Sample table title}
-  \label{sample-table}
-  \centering
-  \begin{tabular}{lll}
-    \toprule
-    \multicolumn{2}{c}{Part}                   \\
-    \cmidrule(r){1-2}
-    Name     & Description     & Size ($\mu$m) \\
+  \begin{tabular}{l | llllllllll}
+    Genre & Metal & Classical & Reggae & Jazz & Country & Rock & Hiphop & Disco & Pop & Blues \\
     \midrule
-    Dendrite & Input terminal  & $\sim$100     \\
-    Axon     & Output terminal & $\sim$10      \\
-    Soma     & Cell body       & up to $10^6$  \\
+    Metal & 44 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+		Classical & 0 & 28 & 0 & 0 & 1 & 1 & 0 & 0 & 0 & 0 \\
+		Reggae & 1 & 1 & 18 & 0 & 1 & 2 & 5 & 3 & 8 & 5 \\
+    Jazz & 1 & 11 & 0 & 28 & 1 & 1 & 0 & 0 & 1 & 2 \\
+		Country & 0 & 2 & 0 & 3 & 20 & 1 & 0 & 0 & 0 & 4 \\
+		Rock & 12 & 0 & 0 & 2 & 5 & 16 & 4 & 2 & 1 & 4 \\
+		Hiphop & 7 & 0 & 1 & 0 & 0 & 0 & 28 & 0 & 1 & 2 \\
+		Disco & 4 & 1 & 4 & 0 & 1 & 9 & 7 & 8 & 7 & 2 \\
+		Pop & 0 & 3 & 1 & 0 & 3 & 2 & 2 & 0 & 35 & 2 \\
+		Blues & 1 & 1 & 0 & 5 & 2 & 0 & 0 & 1 & 0 & 20 \\
     \bottomrule
   \end{tabular}
 \end{table}
 
-\section{Final instructions}
+\begin{table}[h]
+  \caption{Classification Report}
+  \centering
+  \begin{tabular}{l | l l l l}
+    Genre & Precision & Recall & F1-Score & Support (number of samples) \\
+    \midrule
+       metal   &    1.00   &   0.63  &    0.77    &    70 \\
+   classical    &   0.93    &  0.60  &    0.73    &    47 \\
+      reggae    &   0.41    &  0.75   &   0.53    &    24 \\
+        jazz    &   0.63    &  0.74   &   0.68    &    39 \\
+     country    &   0.67    &  0.59   &   0.62    &    34 \\
+        rock    &   0.35    &  0.50   &   0.41    &    32 \\
+      hiphop    &   0.72    &  0.61   &   0.66    &    46 \\
+       disco    &   0.19    &  0.57   &   0.28    &    14 \\
+         pop    &   0.73    &  0.66   &   0.69    &    53 \\
+       blues    &   0.67   &   0.49   &   0.56   &     41 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
 
-Do not change any aspects of the formatting parameters in the style files.  In
-particular, do not modify the width or length of the rectangle the text should
-fit into, and do not change font sizes (except perhaps in the
-\textbf{References} section; see below). Please note that pages should be
-numbered.
-
-\section{Preparing PDF files}
-
-Please prepare submission files with paper size ``US Letter,'' and not, for
-example, ``A4.''
-
-Fonts were the main cause of problems in the past years. Your PDF file must only
-contain Type 1 or Embedded TrueType fonts. Here are a few instructions to
-achieve this.
-
-\begin{itemize}
-
-\item You should directly generate PDF files using \verb+pdflatex+.
-
-\item You can check which fonts a PDF files uses.  In Acrobat Reader, select the
-  menu Files$>$Document Properties$>$Fonts and select Show All Fonts. You can
-  also use the program \verb+pdffonts+ which comes with \verb+xpdf+ and is
-  available out-of-the-box on most Linux machines.
-
-\item The IEEE has recommendations for generating PDF files whose fonts are also
-  acceptable for NeurIPS. Please see
-  \url{http://www.emfield.org/icuwb2010/downloads/IEEE-PDF-SpecV32.pdf}
-
-\item \verb+xfig+ "patterned" shapes are implemented with bitmap fonts.  Use
-  "solid" shapes instead.
-
-\item The \verb+\bbold+ package almost always uses bitmap fonts.  You should use
-  the equivalent AMS Fonts:
-\begin{verbatim}
-   \usepackage{amsfonts}
-\end{verbatim}
-followed by, e.g., \verb+\mathbb{R}+, \verb+\mathbb{N}+, or \verb+\mathbb{C}+
-for $\mathbb{R}$, $\mathbb{N}$ or $\mathbb{C}$.  You can also use the following
-workaround for reals, natural and complex:
-\begin{verbatim}
-   \newcommand{\RR}{I\!\!R} %real numbers
-   \newcommand{\Nat}{I\!\!N} %natural numbers
-   \newcommand{\CC}{I\!\!\!\!C} %complex numbers
-\end{verbatim}
-Note that \verb+amsfonts+ is automatically loaded by the \verb+amssymb+ package.
-
-\end{itemize}
-
-If your file contains type 3 fonts or non embedded TrueType fonts, we will ask
-you to fix it.
-
-\subsection{Margins in \LaTeX{}}
-
-Most of the margin problems come from figures positioned by hand using
-\verb+\special+ or other commands. We suggest using the command
-\verb+\includegraphics+ from the \verb+graphicx+ package. Always specify the
-figure width as a multiple of the line width as in the example below:
-\begin{verbatim}
-   \usepackage[pdftex]{graphicx} ...
-   \includegraphics[width=0.8\linewidth]{myfile.pdf}
-\end{verbatim}
-See Section 4.4 in the graphics bundle documentation
-(\url{http://mirrors.ctan.org/macros/latex/required/graphics/grfguide.pdf})
-
-A number of width problems arise when \LaTeX{} cannot properly hyphenate a
-line. Please give LaTeX hyphenation hints using the \verb+\-+ command when
-necessary.
-
-\subsubsection*{Acknowledgments}
-
-Use unnumbered third level headings for the acknowledgments. All acknowledgments
-go at the end of the paper. Do not include acknowledgments in the anonymized
-submission, only in the final paper.
+\begin{table}[h]
+  \caption{Classification Report Averages}
+  \centering
+  \begin{tabular}{l | l l l l}
+    Type & Precision & Recall & F1-Score & Support (number of samples) \\
+    \midrule
+		Macro Average & 0.63 & 0.61 & 0.59 & 400 \\
+		Weighted Average & 0.71 & 0.61 & 0.64 & 400 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
 
 \section*{References}
 
