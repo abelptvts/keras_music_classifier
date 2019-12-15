@@ -26,10 +26,10 @@ Zsombor Molnár
 
 \begin{abstract}
 	In this paper we describe a convolutional neural network designed to classify music by genre.
-	The base idea came from an article we read about the combination of CNN and mathematical algorithms for a music classification \cite{sample}.
+	The base idea came from an article we read about the combination of CNN and mathematical algorithms for music classification \cite{sample}.
 	At the moment the network can categorise at a 61\% accuracy.
 	We use the GTZAN dataset with slight modifications as it covers all our needs.
-	During the building of this network we encountered numerous challenges, especially with the activation functions.
+	During the building of this neural network we encountered numerous challenges, especially with the activation functions.
 	A constant problem was overlearning, which we could only delay. 
 \end{abstract}
 
@@ -93,7 +93,7 @@ Zsombor Molnár
     network architectures during development. At first we tried to use convolutional
     windows that would overlap the whole frequency domain and move only in the time domain,
     since although spectrograms can be regarded as arbitrary two dimensional data, the two
-    axises have different meanings. This path led nowhere, the model was not able to
+    axises have different meanings. This path led nowhere, as the model was not able to
     overfit on a small subset of the dataset. We decided to use simple, rectangular convolutional
     windows, which could be called standard by now. This approach was indeed able to overfit, meaning
     it was worth to try learning on the whole dataset. Validation error would cease to decrease
@@ -127,7 +127,7 @@ Zsombor Molnár
     \paragraph{Optimizer}
     The optimizer algorithm used during training was Stochastic Gradient Descent with a learning rate of 0.01.
     At first we've tried with \emph{Adam} but it did not perform quite as expected. The next choice
-    was \emph{Adadelta} which showed promising results, but it did not appear to stable due to the
+    was \emph{Adadelta} which showed promising results, but it did not appear to stabilize due to the
     fluctuation we have observed on both the graphs of training and validation accuracy.
 
     \paragraph{Number of Epoch and Data Split}
