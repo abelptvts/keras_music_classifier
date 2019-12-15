@@ -1,22 +1,6 @@
 \documentclass{article}
 
-% if you need to pass options to natbib, use, e.g.:
-%     \PassOptionsToPackage{numbers, compress}{natbib}
-% before loading neurips_2019
-
-% ready for submission
-% \usepackage{neurips_2019}
-
-% to compile a preprint version, e.g., for submission to arXiv, add add the
-% [preprint] option:
-%     \usepackage[preprint]{neurips_2019}
-
-% to compile a camera-ready version, add the [final] option, e.g.:
-     \usepackage[final]{neurips_2019}
-
-% to avoid loading the natbib package, add option nonatbib:
-%     \usepackage[nonatbib]{neurips_2019}
-
+\usepackage[final]{neurips_2019}
 \usepackage[utf8]{inputenc} % allow utf-8 input
 \usepackage[T1]{fontenc}    % use 8-bit T1 fonts
 \usepackage{hyperref}       % hyperlinks
@@ -28,43 +12,9 @@
 
 \title{Music Classification Using Convolutional Neural Networks}
 
-% The \author macro works with any number of authors. There are two commands
-% used to separate the names and addresses of multiple authors: \And and \AND.
-%
-% Using \And between authors leaves it to LaTeX to determine where to break the
-% lines. Using \AND forces a line break at that point. So, if LaTeX puts 3 of 4
-% authors names on the first line, and the last on the second line, try using
-% \AND instead of \And before the third author name.
-
 \author{%
-  David S.~Hippocampus\thanks{Use footnote for providing further information
-    about author (webpage, alternative address)---\emph{not} for acknowledging
-    funding agencies.} \\
-  Department of Computer Science\\
-  Cranberry-Lemon University\\
-  Pittsburgh, PA 15213 \\
-  \texttt{hippo@cs.cranberry-lemon.edu} \\
-  % examples of more authors
-  % \And
-  % Coauthor \\
-  % Affiliation \\
-  % Address \\
-  % \texttt{email} \\
-  % \AND
-  % Coauthor \\
-  % Affiliation \\
-  % Address \\
-  % \texttt{email} \\
-  % \And
-  % Coauthor \\
-  % Affiliation \\
-  % Address \\
-  % \texttt{email} \\
-  % \And
-  % Coauthor \\
-  % Affiliation \\
-  % Address \\
-  % \texttt{email} \\
+  Abel Putovici\And
+	Zsombor Molnár
 }
 
 \begin{document}
@@ -79,14 +29,30 @@
   must be limited to one paragraph.
 \end{abstract}
 
-\section{Submission of papers to NeurIPS 2019}
+\section{Introduction}
 
-NeurIPS requires electronic submissions.  The electronic submission site is
-\begin{center}
-  \url{https://cmt.research.microsoft.com/NeurIPS2019/}
-\end{center}
+Music is and has always been one of the most popular forms of art and 
+entertainment. The number of people who use streaming services to consume music 
+has grown to a magnitude of millions in this decade. These services make use of 
+complicated and complex recommender systems to help grow the number of 
+daily active users and to improve their experience of the service. These recommender 
+systems rely on extremely large labeled datasets in order to work properly, and 
+labeling these datasets manually is a very resource-heavy endeavour. 
 
-Please read the instructions below carefully and follow them faithfully.
+\subsection{Our Goals} 
+
+\paragraph{Music Genres in General}
+
+One possible way of labeling songs is doing it by genre though this introduces 
+other difficulties, since these are ment to indicate the artistic nature of music, an 
+aspect which tends to be highly subjective and controversial. Music genres do not have a 
+proper, formal definition and often overlap as well, making music classification by 
+genre a more difficult task to do right. 
+
+\paragraph{Our Primary Goal}
+
+Our primary goal was do deliver a solution which can effectively recognize some of the 
+most popular and generic music genres and assign these as labels to songs of music.
 
 \subsection{Style}
 
