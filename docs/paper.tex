@@ -39,7 +39,7 @@ daily active users and to improve their experience of the service. These recomme
 systems rely on extremely large labeled datasets in order to work properly, and 
 labeling these datasets manually is a very resource-heavy endeavour. 
 
-\subsection{Our Goals} 
+\subsection{Our Goal} 
 
 \paragraph{Music Genres in General}
 
@@ -52,7 +52,17 @@ genre a more difficult task to do right.
 \paragraph{Our Primary Goal}
 
 Our primary goal was do deliver a solution which can effectively recognize some of the 
-most popular and generic music genres and assign these as labels to songs of music.
+most popular and generic music genres and assign these as labels to songs of music. 
+
+\section{Our Approach}
+
+There are many existing solutions and research papers regarding the subject and these 
+show absolutely usable methods and results, though each of them tend to have a major 
+drawback: every solution aims to work in \emph{centralized environments} due to their 
+computational requirements. We decided that our approach had to be able to work on 
+edge devices such as smart phones or other, more constrained environments, even on 
+cost of precision. This decision implied a rather small model size and great model 
+simplicity, this is why we chose to try a simple convolutional neural network.    
 
 \subsection{Style}
 
